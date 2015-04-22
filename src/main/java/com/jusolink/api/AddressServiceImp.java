@@ -42,7 +42,7 @@ import com.google.gson.Gson;
  * @author KimSeongjun
  * @version 1.0.0
  */
-public class SearchServiceImp implements SearchService {
+public class AddressServiceImp implements AddressService {
 
 	private final String ServiceID = "JUSOLINK";
 	private final String ServiceURL = "https://juso.linkhub.co.kr";

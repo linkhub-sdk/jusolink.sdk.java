@@ -20,7 +20,7 @@ package com.jusolink.api;
  * @author KimSeongjun
  * @version 1.0.0
  */
-public interface SearchService {
+public interface AddressService {
 
 	/**
 	 * 잔여포인트 확인

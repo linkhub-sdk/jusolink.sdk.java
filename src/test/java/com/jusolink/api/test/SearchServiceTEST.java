@@ -4,18 +4,18 @@ import org.junit.Test;
 
 import com.jusolink.api.JusoLinkException;
 import com.jusolink.api.SearchResult;
-import com.jusolink.api.SearchService;
-import com.jusolink.api.SearchServiceImp;
+import com.jusolink.api.AddressService;
+import com.jusolink.api.AddressServiceImp;
 
 public class SearchServiceTEST {
 
 	private final String testLinkID = "TESTER_JUSO";
 	private final String testSecretKey = "FjaRgAfVUPvSDHTrdd/uw/dt/Cdo3GgSFKyE1+NQ+bc=";
 
-	private SearchService searchService;
+	private AddressService searchService;
 	
 	public SearchServiceTEST() {
-		SearchServiceImp service = new SearchServiceImp();
+		AddressServiceImp service = new AddressServiceImp();
 
 		service.setLinkID(testLinkID);
 		service.setSecretKey(testSecretKey);
