@@ -179,13 +179,23 @@ public class AddressServiceImp implements AddressService {
 		boolean expired = true;
 
 		if (token != null) {
+
 			SimpleDateFormat format = new SimpleDateFormat(
 					"yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
 			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
+			SimpleDateFormat subFormat = new SimpleDateFormat(
+					"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			subFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
 			try {
 				Date expiration = format.parse(token.getExpiration());
-				expired = expiration.before(new Date());
-			} catch (ParseException e) {
+				Date UTCTime = subFormat.parse(getTokenbuilder().getTime());
+				expired = expiration.before(UTCTime);
+				
+			} catch (LinkhubException le){
+				throw new JusoLinkException(le);
+			} catch (ParseException e){
 			}
 		}
 
