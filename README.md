@@ -7,5 +7,5 @@ jusolink.sdk.java
 		<dependency>
 			<groupId>kr.co.linkhub</groupId>
 			<artifactId>jusolink-sdk</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
