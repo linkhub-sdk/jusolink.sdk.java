@@ -42,7 +42,7 @@ public class SearchServiceTEST {
 	@Test
 	public void searchAddress_TEST() throws JusoLinkException {
 
-		SearchResult searchResult = searchService.searchAddress("과주광역시 신창 호반", 1);
+		SearchResult searchResult = searchService.searchAddress("광주광역시 신창", 1);
 
 		System.out.println(searchResult.getNumFound());
 	}
