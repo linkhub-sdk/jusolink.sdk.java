@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2014 innopost.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2006-2014 linkhub.co.kr, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import kr.co.linkhub.auth.LinkhubException;
  * JusoLink Operation Exception.
  * 
  * @author KimSeongjun
- * @version 1.0.0
+ * @version 1.0.3
  */
 public class JusoLinkException extends Exception {
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2014 innopost.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2006-2014 linkhub.co.kr, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 import kr.co.linkhub.auth.LinkhubException;
 import kr.co.linkhub.auth.Token;
@@ -40,7 +41,7 @@ import com.google.gson.Gson;
  * Implements of JusoLink Services.
  * 
  * @author KimSeongjun
- * @version 1.0.0
+ * @version 1.0.3
  */
 public class AddressServiceImp implements AddressService {
 
@@ -258,6 +259,8 @@ public class AddressServiceImp implements AddressService {
 		httpURLConnection.setRequestProperty("x-api-version".toLowerCase(),
 				APIVersion);
 
+		httpURLConnection.setRequestProperty("Accept-Encoding",	"gzip");
+
 		if (Action != null && Action.isEmpty() == false) {
 			httpURLConnection.setRequestProperty("X-HTTP-Method-Override",
 					Action);
@@ -281,35 +284,62 @@ public class AddressServiceImp implements AddressService {
 			httpURLConnection.setRequestProperty("Content-Length",
 					String.valueOf(btPostData.length));
 
+			DataOutputStream output = null;
+		
 			try {
 
-				DataOutputStream output = new DataOutputStream(
+				output = new DataOutputStream(
 						httpURLConnection.getOutputStream());
 				output.write(btPostData);
 				output.flush();
-				output.close();
+				
 			} catch (Exception e) {
 				throw new JusoLinkException(-99999999,
 						"Fail to POST data to Server.", e);
+			} finally {
+				if (output != null){
+					try {
+						output.close();
+					} catch (IOException e) {
+						throw new JusoLinkException(-99999999,
+								"Jusolink func OutputStream close exception.", e);
+					}
+				}
 			}
 
 		}
 		String Result = "";
-
+		
+		InputStream input = null;
+		
 		try {
-			InputStream input = httpURLConnection.getInputStream();
-			Result = fromStream(input);
-			input.close();
+			input = httpURLConnection.getInputStream();
+			
+			if (httpURLConnection.getContentEncoding().equals("gzip")) {
+				Result = fromGzipStream(input);
+			} else {
+				Result = fromStream(input);
+			}
+			
 		} catch (IOException e) {
 
 			ErrorResponse error = null;
-
+			InputStream is = null;
+			
 			try {
-				InputStream input = httpURLConnection.getErrorStream();
-				Result = fromStream(input);
-				input.close();
+				is = httpURLConnection.getErrorStream();
+				Result = fromStream(is);
+				
 				error = fromJsonString(Result, ErrorResponse.class);
 			} catch (Exception E) {
+				
+			} finally {
+				try {
+					is.close();
+				} catch (IOException e1) {
+					throw new JusoLinkException(-99999999,
+							"Jusolink func InputStream close exception.", e);
+				}
 			}
 
 			if (error == null)
@@ -317,6 +347,15 @@ public class AddressServiceImp implements AddressService {
 						"Fail to receive data from Server.", e);
 			else
 				throw new JusoLinkException(error.getCode(), error.getMessage());
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					throw new JusoLinkException(-99999999,
+							"Jusolink func InputStream close exception.", e);
+				}
+			}
 		}
 
 		return fromJsonString(Result, clazz);
@@ -342,26 +381,41 @@ public class AddressServiceImp implements AddressService {
 
 		httpURLConnection.setRequestProperty("Authorization", "Bearer " + getSessionToken(null));
 		
+		httpURLConnection.setRequestProperty("Accept-Encoding",	"gzip");
 
 		httpURLConnection.setRequestProperty("x-api-version".toLowerCase(),
 				APIVersion);
 
 		String Result = "";
-
+		
+		InputStream input = null;
+		
 		try {
-			InputStream input = httpURLConnection.getInputStream();
-			Result = fromStream(input);
-			input.close();
-		} catch (IOException e) {
-
-			ErrorResponse error = null;
-
-			try {
-				InputStream input = httpURLConnection.getErrorStream();
+			input = httpURLConnection.getInputStream();
+			
+			if (httpURLConnection.getContentEncoding().equals("gzip")) {
+				Result = fromGzipStream(input);
+			} else {
 				Result = fromStream(input);
-				input.close();
+			}
+			
+		} catch (IOException e) {
+			ErrorResponse error = null;
+			InputStream is = null;
+			try {
+				is = httpURLConnection.getErrorStream();
+				Result = fromStream(is);
 				error = fromJsonString(Result, ErrorResponse.class);
 			} catch (Exception E) {
+			} finally {
+				if (is != null){
+					try {
+						is.close();
+					} catch (IOException e1) {
+						throw new JusoLinkException(-99999999,
+								"Jusolink func InputStream close exception.", e);
+					}
+				}
 			}
 
 			if (error == null)
@@ -369,6 +423,15 @@ public class AddressServiceImp implements AddressService {
 						"Fail to receive data from Server.", e);
 			else
 				throw new JusoLinkException(error.getCode(), error.getMessage());
+		} finally {
+			if (input != null){
+				try {
+					input.close();
+				} catch (IOException e) {
+					throw new JusoLinkException(-99999999,
+							"Jusolink func InputStream close exception.", e);
+				}
+			}
 		}
 
 		return fromJsonString(Result, clazz);
@@ -395,23 +458,70 @@ public class AddressServiceImp implements AddressService {
 
 	}
 	
-	private static String fromStream(InputStream input) throws IOException {
+	private static String fromStream(InputStream input) throws JusoLinkException {
+		InputStreamReader is = null;
+		BufferedReader br = null;
+		StringBuilder sb = null;
+		
+		try {
+			is = new InputStreamReader(input,	Charset.forName("UTF-8"));
+			sb = new StringBuilder();
+			br = new BufferedReader(is);
 
-		InputStreamReader is = new InputStreamReader(input,
-				Charset.forName("UTF-8"));
-		StringBuilder sb = new StringBuilder();
-		BufferedReader br = new BufferedReader(is);
+			String read = br.readLine();
 
-		String read = br.readLine();
-
-		while (read != null) {
-			sb.append(read);
-			read = br.readLine();
+			while (read != null) {
+				sb.append(read);
+				read = br.readLine();
+			}
+		} catch (IOException ignored){
+			
+		} finally {
+			try {
+				if (br != null) br.close();
+				if (is != null) is.close();
+			} catch (IOException e) {
+				throw new JusoLinkException(-99999999,
+						"Jusolink func fromStream stream close exception.", e);
+			}
 		}
+		
 
 		return sb.toString();
 	}
-
 	
-
+	private static String fromGzipStream(InputStream input) throws JusoLinkException {
+		GZIPInputStream zipReader = null;
+		InputStreamReader is = null;		
+		BufferedReader br = null;
+		StringBuilder sb = null;
+		
+		try {
+			zipReader = new GZIPInputStream(input);
+			is = new InputStreamReader(zipReader, "UTF-8");
+			br = new BufferedReader(is);
+			sb = new StringBuilder();
+	
+			String read = br.readLine();
+	
+			while (read != null) {
+				sb.append(read);
+				read = br.readLine();
+			}
+		} catch (IOException e) {
+			throw new JusoLinkException(-99999999, 
+					"Jusolink fromGzipStream func Exception", e);
+		} finally {
+			try {
+				if (br != null) br.close();
+				if (is != null) is.close();
+				if (zipReader != null) zipReader.close();
+			} catch (IOException e) {
+				throw new JusoLinkException(-99999999,
+					"Jusolink fromGzipStream func finally close Exception", e);
+			}
+		}
+		
+		return sb.toString();
+	}
 }
