@@ -45,10 +45,14 @@ import com.google.gson.Gson;
  */
 public class AddressServiceImp implements AddressService {
 
-	private final String ServiceID = "JUSOLINK";
-	private final String ServiceURL = "https://juso.linkhub.co.kr";
-	private final String APIVersion = "1.0";
+	private static final String ServiceID = "JUSOLINK";
+	private static final String DefaultServiceURL = "https://juso.linkhub.co.kr";
+	private static final String APIVersion = "1.0";
 
+	private String ServiceURL = DefaultServiceURL;
+	
+	private String AuthURL = null;
+	
 	private TokenBuilder tokenBuilder;
 
 	private String linkID;
@@ -83,7 +87,22 @@ public class AddressServiceImp implements AddressService {
 	public void setSecretKey(String secretKey) {
 		this.secretKey = secretKey;
 	}
-
+	
+	/**
+	 * Proxy 인증 URL 설정.
+	 * @param authURL
+	 */
+	public void setAuthURL(String authURL) {
+		this.AuthURL = authURL;
+	}
+	
+	/**
+	 * Proxy 운영기 URL 설정.
+	 * @param serviceURL
+	 */
+	public void setServiceURL(String serviceURL) {
+		this.ServiceURL = serviceURL;
+	}
 	/* (non-Javadoc)
 	 * @see com.jusolink.api.SearchService#getUnitCost()
 	 */
@@ -169,6 +188,8 @@ public class AddressServiceImp implements AddressService {
 					.getInstance(getLinkID(), getSecretKey())
 					.ServiceID(ServiceID)
 					.addScope("200");
+			
+			if(AuthURL != null) tokenBuilder.setServiceURL(AuthURL);
 		}
 
 		return tokenBuilder;
