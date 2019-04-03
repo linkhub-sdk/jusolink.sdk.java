@@ -185,7 +185,7 @@ public class AddressServiceImp implements AddressService {
 	private TokenBuilder getTokenbuilder() {
 		if (this.tokenBuilder == null) {
 			tokenBuilder = TokenBuilder
-					.getInstance(getLinkID(), getSecretKey())
+					.newInstance(getLinkID(), getSecretKey())
 					.ServiceID(ServiceID)
 					.addScope("200");
 			
