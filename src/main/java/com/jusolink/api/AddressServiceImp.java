@@ -336,7 +336,7 @@ public class AddressServiceImp implements AddressService {
 		try {
 			input = httpURLConnection.getInputStream();
 			
-			if (httpURLConnection.getContentEncoding().equals("gzip")) {
+			if (null != httpURLConnection.getContentEncoding() && httpURLConnection.getContentEncoding().equals("gzip")) {
 				Result = fromGzipStream(input);
 			} else {
 				Result = fromStream(input);
@@ -414,7 +414,7 @@ public class AddressServiceImp implements AddressService {
 		try {
 			input = httpURLConnection.getInputStream();
 			
-			if (httpURLConnection.getContentEncoding().equals("gzip")) {
+			if (null != httpURLConnection.getContentEncoding() && httpURLConnection.getContentEncoding().equals("gzip")) {
 				Result = fromGzipStream(input);
 			} else {
 				Result = fromStream(input);
