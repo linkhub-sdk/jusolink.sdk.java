@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>kr.co.linkhub</groupId>
 	<artifactId>jusolink-sdk</artifactId>
-	<version>1.1.1</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>JusoLink API SDK</name>
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>kr.co.linkhub</groupId>
 			<artifactId>linkhub-auth</artifactId>
-			<version>1.2.0</version>
+			<version>1.9.0</version>
 		</dependency>
 
 		<dependency>
